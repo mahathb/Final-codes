@@ -1,60 +1,97 @@
+require('dotenv').config();
 const sequelize = require('./config/db');
-const Student = require('./models/Student');
-const MessManager = require('./models/MessManager');
-const Menu = require('./models/Menu');
-const Feedback = require('./models/Feedback');
-const Transaction = require('./models/Transaction');
-const RebateRequest = require('./models/Rebate');
-const ExtraItem = require('./models/ExtraItem');
+const bcrypt = require('bcrypt');
+const { 
+    Student, 
+    MessManager, 
+    Menu, 
+    Poll, 
+    PollOption, 
+    ExtraItem 
+} = require('./models/Index');
 
-const seedData = async () => {
-  try {
-    await sequelize.sync({ force: true }); 
+const seedDatabase = async () => {
+    try {
+        console.log("⏳ Connecting to Database...");
+        await sequelize.authenticate();
+        
+        // sync({ force: true }) wipes the DB clean. 
+        // Use this ONCE to fix the "StudentRollNo does not exist" error.
+        await sequelize.sync({ force: true });
+        console.log("✅ Database Wiped and Re-synced.");
 
-    console.log('⏳ Seeding Managers & Students...');
-    await MessManager.bulkCreate([
-      { adminId: 'ADMIN01', name: 'Ujjwal Kajal', password: 'hashedpassword', role: 'Admin' }
-    ]);
+        // 1. Create a Student (Password must be hashed for authController.login)
+        const hashedPassword = await bcrypt.hash("abcdef", 10);
+        await Student.create({
+            rollNo: "231004",
+            name: "Siddhant Singh",
+            email: "siddhant23@iitk.ac.in",
+            password: hashedPassword,
+            roomNo: "H1-101",
+            status: "Approved", // Approved status allows login
+            messCardStatus: "Active"
+        });
 
-    await Student.bulkCreate([
-      { rollNo: '240252', name: 'B Mahath', email: 'bmahath24@iitk.ac.in', password: 'pwd', roomNo: 'A-101', messCardStatus: 'Active' },
-      { rollNo: '240804', name: 'Priyanshi Meena', email: 'priyanshim24@iitk.ac.in', password: 'pwd', roomNo: 'B-205', messCardStatus: 'Active' },
-      { rollNo: '240484', name: 'Rishith Jalagam', email: 'rishithjs24@iitk.ac.in', password: 'pwd', roomNo: 'C-301', messCardStatus: 'Suspended' }
-    ]);
+        // 2. Create a Manager (authController uses plain text for managers)
+        await MessManager.create({
+            id: 1,
+            name: "Admin",
+            email: "manager@mess.com",
+            password: "abcd1234" 
+        });
 
-    console.log('⏳ Seeding Menu & Extras...');
-    await Menu.bulkCreate([
-      { date: '2026-03-20', mealType: 'Breakfast', items: 'Poha, Sambar, Idli (4 pcs), Tea/Coffee', voteCount: 45 },
-      { date: '2026-03-20', mealType: 'Dinner', items: 'Roti, Rice, Rajma Masala, Aloo Gobi', voteCount: 89 }
-    ]);
+        // 3. Create Menu for Today
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const todayName = days[new Date().getDay()];
+        
+        const menuData = [
+            { day: todayName, mealType: "Breakfast", items: ["Poha", "Tea", "Jalebi"] },
+            { day: todayName, mealType: "Lunch", items: ["Dal Makhani", "Rice", "Roti", "Curd"] },
+            { day: todayName, mealType: "Dinner", items: ["Paneer Butter Masala", "Jeera Rice", "Gulab Jamun"] }
+        ];
+        await Menu.bulkCreate(menuData);
 
-    await ExtraItem.bulkCreate([
-      { itemName: 'Paneer Curry', price: 50.00, stockQuantity: 20, isAvailable: true },
-      { itemName: 'Ice Cream', price: 30.00, stockQuantity: 50, isAvailable: true }
-    ]);
+        // 4. Create an Active Poll
+        const poll = await Poll.create({
+            title: "Special Sunday Dinner",
+            description: "Vote for your favorite meal!",
+            status: "active",
+            startDate: new Date()
+        });
 
-    console.log('⏳ Seeding Transactions, Rebates & Feedback...');
-    await Transaction.bulkCreate([
-      { studentRollNo: '240252', itemName: null, amount: 4500.00, type: 'Monthly Fee', status: 'Completed' },
-      { studentRollNo: '240252', itemName: 'Paneer Curry', amount: 50.00, type: 'Extra Item', status: 'Completed' },
-      { studentRollNo: '240804', itemName: 'Ice Cream', amount: 60.00, type: 'Extra Item', status: 'Completed' }
-    ]);
+        // 5. Create Poll Options (linked to the Poll)
+        await PollOption.bulkCreate([
+            { name: "Chicken Biryani", mealType: "Dinner", PollId: poll.id },
+            { name: "Masala Dosa", mealType: "Dinner", PollId: poll.id },
+            { name: "Paneer Pulao", mealType: "Dinner", PollId: poll.id }
+        ]);
 
-    await RebateRequest.bulkCreate([
-      { studentRollNo: '240484', startDate: '2026-03-25', endDate: '2026-03-30', reason: 'Going home', status: 'Pending' }
-    ]);
+        // 6. Create Extra Items
+        await ExtraItem.bulkCreate([
+            { 
+                name: "Omelette", 
+                price: 20.00, 
+                stockQuantity: 100, 
+                mealType: "Breakfast", 
+                day: "All", 
+                isAvailable: true 
+            },
+            { 
+                name: "Cold Coffee", 
+                price: 35.00, 
+                stockQuantity: 50, 
+                mealType: "All", 
+                day: "All", 
+                isAvailable: true 
+            }
+        ]);
 
-    await Feedback.bulkCreate([
-      { studentRollNo: '240252', rating: 4, category: 'Food Quality', comment: 'Paneer was great.' },
-      { studentRollNo: '240804', rating: 5, category: 'Service', comment: 'Very fast today.' }
-    ]);
-
-    console.log('✅ Database successfully seeded!');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Seeding failed:', error);
-    process.exit(1);
-  }
+        console.log("🌱 Database Seeded Successfully!");
+        process.exit(0);
+    } catch (error) {
+        console.error("❌ Seeding Failed:", error);
+        process.exit(1);
+    }
 };
 
-seedData();
+seedDatabase();

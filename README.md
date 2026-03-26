@@ -85,6 +85,6 @@ Camera Lock: The React webcam must be turned off when train_my_face.py starts, o
 Ports: 
 * React: 5173
 
-Node.js: 5000
+* Node.js: 5000
 
-Python AI: 8000
+* Python AI: 8000
