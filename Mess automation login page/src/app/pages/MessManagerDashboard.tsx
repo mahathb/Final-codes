@@ -85,7 +85,7 @@ export default function ManagerDashboard() {
         >
           <MenuIcon className="w-6 h-6" />
         </button>
-        
+
         <div className="flex items-center gap-3 ml-4">
           <div className="w-10 h-10 border-2 border-black flex items-center justify-center font-bold">
             IIT
@@ -101,7 +101,7 @@ export default function ManagerDashboard() {
           <p className="text-xs text-gray-600">{currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
         </div>
 
-        <button 
+        <button
           onClick={handleLogout}
           className="ml-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center gap-2 text-sm font-medium"
         >
@@ -112,7 +112,7 @@ export default function ManagerDashboard() {
 
       <div className="pt-16 flex">
         {/* Sidebar */}
-        <Sidebar 
+        <Sidebar
           isOpen={sidebarOpen}
           menuItems={menuItems}
           activeSection={activeSection}
@@ -140,7 +140,8 @@ function DashboardOverview({ onNavigate }: { onNavigate: (section: string) => vo
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/stats', {
+      const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${BASE_URL}/api/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -170,7 +171,7 @@ function DashboardOverview({ onNavigate }: { onNavigate: (section: string) => vo
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsList.map((stat) => {
           const Icon = stat.icon;
