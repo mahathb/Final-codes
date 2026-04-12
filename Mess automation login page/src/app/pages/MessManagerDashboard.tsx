@@ -24,7 +24,9 @@ import { NewPersonRequests } from '../components/NewPersonRequests';
 
 export default function ManagerDashboard() {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeSection, setActiveSection] = useState(() => {
+    return localStorage.getItem('managerActiveSection') || 'dashboard';
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -38,6 +40,10 @@ export default function ManagerDashboard() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('managerActiveSection', activeSection);
+  }, [activeSection]);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },

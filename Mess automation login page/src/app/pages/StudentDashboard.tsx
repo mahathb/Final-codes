@@ -11,13 +11,19 @@ import { RequestRebate } from '@/app/components/RequestRebate';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('studentActiveTab') || 'dashboard';
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/');
   };
+
+  useEffect(() => {
+    localStorage.setItem('studentActiveTab', activeTab);
+  }, [activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {
