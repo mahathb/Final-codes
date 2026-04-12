@@ -75,8 +75,11 @@ export function VotesSection() {
               </div>
 
               <div className="space-y-3">
-                {[...(poll.PollOptions || [])].sort((a, b) => b.votes - a.votes).map((opt) => {
-                  const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+                {[...(poll.PollOptions || [])].sort((a, b) => a.mealType.localeCompare(b.mealType) || b.votes - a.votes).map((opt) => {
+                  const mealTotalVotes = (poll.PollOptions || [])
+                      .filter(o => o.mealType === opt.mealType)
+                      .reduce((sum, o) => sum + o.votes, 0);
+                  const percentage = mealTotalVotes > 0 ? Math.round((opt.votes / mealTotalVotes) * 100) : 0;
                   return (
                     <div key={opt.id}>
                       <div className="flex items-center justify-between mb-1">

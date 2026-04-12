@@ -87,6 +87,7 @@ export function Profile() {
           phone: editData.phone
         }));
         setIsEditing(false);
+        alert('Profile updated successfully!');
       } else {
         const err = await res.json();
         alert(err.error || 'Failed to update profile');
