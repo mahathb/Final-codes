@@ -457,13 +457,20 @@ export function MenuManagement() {
               <button 
                 onClick={async () => {
                     const token = localStorage.getItem('token');
-                    await fetch(`${API_HOST}/api/extras/add`, {
+                    const res = await fetch(`${API_HOST}/api/extras/add`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                         body: JSON.stringify({ name: newItemName, price: newItemPrice, mealType: newItemCategory, day: 'All' })
                     });
-                    fetchExtras();
-                    setShowAddItemForm(false);
+                    if (res.ok) {
+                        fetchExtras();
+                        setShowAddItemForm(false);
+                        setNewItemName('');
+                        setNewItemPrice('');
+                    } else {
+                        const err = await res.json();
+                        alert(err.error || "Failed to add item");
+                    }
                 }}
                 className="px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors"
               >

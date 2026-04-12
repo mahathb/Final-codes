@@ -18,6 +18,17 @@ exports.addExtraItem = async (req, res) => {
       return res.status(403).json({ error: "Only manager allowed" });
     }
 
+    // Check if item with exact name already exists
+    const existingItem = await ExtraItem.findOne({ 
+      where: { name: req.body.name } 
+    });
+
+    if (existingItem) {
+      return res.status(400).json({ 
+        error: "An item with this exact name already exists in the inventory." 
+      });
+    }
+
     const item = await ExtraItem.create(req.body);
 
     res.json({ message: "Item added", item });
