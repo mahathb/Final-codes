@@ -214,6 +214,12 @@ exports.login = async (req, res) => {
           error: "Your account has been rejected"
         });
       }
+
+      if (user.messCardStatus === "Suspended") {
+        return res.status(403).json({
+          error: "Your account is currently suspended from accessing mess facilities."
+        });
+      }
     }
 
     const token = generateToken(user, role);
@@ -238,7 +244,7 @@ exports.loginFace = async (req, res) => {
     // Fetch all students who have a face photo registered
     const students = await Student.findAll({
         where: { facePhoto: { [require('sequelize').Op.ne]: null } },
-        attributes: ['rollNo', 'facePhoto', 'name', 'status']
+        attributes: ['rollNo', 'facePhoto', 'name', 'status', 'messCardStatus']
     });
 
     if (students.length === 0) {
@@ -269,6 +275,9 @@ exports.loginFace = async (req, res) => {
         }
         if (user.status === "Rejected") {
             return res.status(403).json({ error: "Your account has been rejected" });
+        }
+        if (user.messCardStatus === "Suspended") {
+            return res.status(403).json({ error: "Your account is currently suspended from accessing mess facilities." });
         }
 
         const token = generateToken(user, "student");
