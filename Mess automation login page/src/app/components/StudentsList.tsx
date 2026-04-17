@@ -102,12 +102,14 @@ export function StudentsList() {
       student.room.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusColor = (status: Student['messStatus']) => {
-    switch (status) {
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
       case 'active':
         return 'bg-green-100 text-green-800 border-green-600';
       case 'suspended':
         return 'bg-red-100 text-red-800 border-red-600';
+      case 'rejected':
+        return 'bg-red-200 text-red-900 border-red-800';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-600';
       default:
@@ -227,10 +229,10 @@ export function StudentsList() {
                   <td className="px-4 py-3">
                     <span
                       className={`text-xs px-2 py-1 border ${getStatusColor(
-                        student.messStatus
+                        student.status === 'rejected' ? 'rejected' : student.messStatus
                       )}`}
                     >
-                      {student.messStatus.toUpperCase()}
+                      {student.status === 'rejected' ? 'REJECTED' : student.messStatus.toUpperCase()}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm">

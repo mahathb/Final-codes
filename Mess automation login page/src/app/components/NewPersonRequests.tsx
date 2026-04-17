@@ -165,15 +165,25 @@ export function NewPersonRequests() {
                   <h4 className="font-bold">{request.name}</h4>
                   <p className="text-sm text-gray-600">{request.rollNumber} - {request.room}</p>
                 </div>
-                <span
-                  className={`text-xs px-3 py-1 ${
-                    request.status === 'approved'
-                      ? 'bg-green-100 text-green-800 border border-green-600'
-                      : 'bg-red-100 text-red-800 border border-red-600'
-                  }`}
-                >
-                  {request.status.toUpperCase()}
-                </span>
+                <div className="flex items-center gap-3">
+                  {request.status === 'rejected' && (
+                    <button
+                      onClick={() => handleAction(request.id, 'approved')}
+                      className="px-3 py-1 bg-black text-white text-xs hover:bg-gray-800 transition-colors"
+                    >
+                      Approve
+                    </button>
+                  )}
+                  <span
+                    className={`text-xs px-3 py-1 ${
+                      request.status === 'approved'
+                        ? 'bg-green-100 text-green-800 border border-green-600'
+                        : 'bg-red-100 text-red-800 border border-red-600'
+                    }`}
+                  >
+                    {request.status.toUpperCase()}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
