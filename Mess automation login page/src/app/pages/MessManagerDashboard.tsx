@@ -24,7 +24,7 @@ import { PollManagement } from '../components/PollManagement';
 import { NewPersonRequests } from '../components/NewPersonRequests';
 import { AnnouncementManagement } from '../components/AnnouncementManagement';
 import { ManagerSettings } from '../components/ManagerSettings';
-import logo from '../../assets/84ee6d492a796a378e91051f21b88828545713cb.png';
+import logo from '../../assets/IIT_Kanpur_Logo.svg.png';
 
 export default function ManagerDashboard() {
   const navigate = useNavigate();
