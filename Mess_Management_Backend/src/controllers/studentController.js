@@ -151,7 +151,7 @@ exports.toggleMessStatus = async (req, res) => {
     }
 
     // Toggle between Active and Suspended
-    console.log(`[TOGGLE STATUS] Student ${student.rollNo} Current: messCardStatus=${student.messCardStatus}, status=${student.status}`);
+    // console.log(`[TOGGLE STATUS] Student ${student.rollNo} Current: messCardStatus=${student.messCardStatus}, status=${student.status}`);
     
     const currentMessStatus = (student.messCardStatus || "").toLowerCase();
     
@@ -165,7 +165,7 @@ exports.toggleMessStatus = async (req, res) => {
     }
     
     await student.save();
-    console.log(`[TOGGLE STATUS] Student ${student.rollNo} New: messCardStatus=${student.messCardStatus}, status=${student.status}`);
+    // console.log(`[TOGGLE STATUS] Student ${student.rollNo} New: messCardStatus=${student.messCardStatus}, status=${student.status}`);
 
     res.json({
       message: `Status updated to ${student.messCardStatus}`,

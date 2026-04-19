@@ -8,7 +8,7 @@ import { ViewDues } from '@/app/components/ViewDues';
 import { Vote } from '@/app/components/Vote';
 import { Feedback } from '@/app/components/Feedback';
 import { RequestRebate } from '@/app/components/RequestRebate';
-import logo from '../../assets/84ee6d492a796a378e91051f21b88828545713cb.png';
+import logo from '../../assets/IIT_Kanpur_Logo.svg.png';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
