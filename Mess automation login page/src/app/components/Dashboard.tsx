@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
-<<<<<<< HEAD
 import { Coffee, UtensilsCrossed, Moon, Megaphone, Calendar, ChevronRight } from 'lucide-react';
 import { WeeklyMenu } from './WeeklyMenu';
-=======
-import { Coffee, UtensilsCrossed, Moon, Megaphone } from 'lucide-react';
 import campusImg from '../../assets/sunset.jpg';
->>>>>>> 43d12a21306d19a19a2a8d3503d7d906d629582a
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 export function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
