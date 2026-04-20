@@ -11,7 +11,9 @@ import {
   CheckCircle,
   UserPlus,
   Settings,
-  LogOut
+  LogOut,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { VotesSection } from '../components/VotesSection';
@@ -32,6 +34,47 @@ export default function ManagerDashboard() {
   });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Stats persisting at parent level
+  const [stats, setStats] = useState({
+    totalStudents: '...',
+    pendingRebates: '...',
+    activePolls: '...',
+    newPersonRequests: '...',
+    todaysPrebookings: '...'
+  });
+  const [recentActivities, setRecentActivities] = useState<{time: string, text: string, type: string}[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchStats = async (isSilent = false) => {
+    if (!isSilent) setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
+      const res = await fetch(`${API_HOST}/api/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStats({
+          totalStudents: String(data.totalStudents || 0),
+          pendingRebates: String(data.pendingRebates || 0),
+          activePolls: String(data.activePolls || 0),
+          newPersonRequests: String(data.newPersonRequests || 0),
+          todaysPrebookings: String(data.todaysPrebookings || 0)
+        });
+        setRecentActivities(data.recentActivities || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch stats', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -86,7 +129,15 @@ export default function ManagerDashboard() {
         return <ManagerSettings />;
       case 'dashboard':
       default:
-        return <DashboardOverview onNavigate={setActiveSection} />;
+        return (
+          <DashboardOverview 
+            onNavigate={setActiveSection} 
+            stats={stats} 
+            recentActivities={recentActivities} 
+            isLoading={isLoading} 
+            onRefresh={fetchStats}
+          />
+        );
     }
   };
 
@@ -143,39 +194,18 @@ export default function ManagerDashboard() {
   );
 }
 
-function DashboardOverview({ onNavigate }: { onNavigate: (section: string) => void }) {
-  const [stats, setStats] = useState({
-    totalStudents: '0',
-    pendingRebates: '0',
-    activePolls: '0',
-    newPersonRequests: '0',
-    todaysPrebookings: '0'
-  });
-  const [recentActivities, setRecentActivities] = useState<{time: string, text: string, type: string}[]>([]);
+interface DashboardOverviewProps {
+  onNavigate: (section: string) => void;
+  stats: any;
+  recentActivities: any[];
+  isLoading: boolean;
+  onRefresh: () => void;
+}
 
-  const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const res = await fetch(`${BASE_URL}/api/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setStats({
-          totalStudents: String(data.totalStudents || 0),
-          pendingRebates: String(data.pendingRebates || 0),
-          activePolls: String(data.activePolls || 0),
-          newPersonRequests: String(data.newPersonRequests || 0),
-          todaysPrebookings: String(data.todaysPrebookings || 0)
-        });
-        setRecentActivities(data.recentActivities || []);
-      }
-    } catch { /* */ }
-  };
-
+function DashboardOverview({ onNavigate, stats, recentActivities, isLoading, onRefresh }: DashboardOverviewProps) {
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'N/A';
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -188,10 +218,6 @@ function DashboardOverview({ onNavigate }: { onNavigate: (section: string) => vo
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
   };
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
   const statsList = [
     { label: 'Total Students', value: stats.totalStudents, icon: Users },
     { label: 'Pending Rebates', value: stats.pendingRebates, icon: FileText },
@@ -201,7 +227,17 @@ function DashboardOverview({ onNavigate }: { onNavigate: (section: string) => vo
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+        <button 
+          onClick={() => onRefresh()}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-all disabled:opacity-50 group"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+          {isLoading ? 'Refreshing...' : 'Refresh Stats'}
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsList.map((stat) => {
@@ -245,6 +281,12 @@ function DashboardOverview({ onNavigate }: { onNavigate: (section: string) => vo
                 <span className="text-sm">{activity.text}</span>
               </div>
             ))
+          ) : isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-4 bg-gray-100 animate-pulse rounded w-full"></div>
+              ))}
+            </div>
           ) : (
             <p className="text-sm text-gray-500 italic">No recent activities found.</p>
           )}

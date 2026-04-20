@@ -1,9 +1,6 @@
 // controllers/extrasController.js
 
-const ExtraItem = require("../models/ExtraItem");
-const ExtraPurchase = require("../models/ExtraPurchase");
-const Student = require("../models/Student");
-const Transaction = require("../models/Transaction");
+const { ExtraItem, ExtraPurchase, Student, Transaction, PreBooking, SpecialItem } = require("../models/Index");
 const { Op } = require("sequelize");
 
 const getCurrentMeal = () => {
@@ -124,10 +121,14 @@ exports.buyExtras = async (req, res) => {
     }
 
     const studentId = req.user.rollNo;
-    const { items } = req.body;
+    const { items, mealSlot } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: "No items selected" });
+    }
+    
+    if (!mealSlot) {
+      return res.status(400).json({ error: "Meal slot must be selected" });
     }
 
     const days = [
@@ -137,14 +138,7 @@ exports.buyExtras = async (req, res) => {
 
     const today = days[new Date().getDay()];
 
-    const getCurrentMeal = () => {
-      const hour = new Date().getHours();
-      if (hour < 11) return "Breakfast";
-      if (hour < 17) return "Lunch";
-      return "Dinner";
-    };
-
-    const currentMeal = getCurrentMeal();
+    const currentMeal = mealSlot;
 
     let totalAmount = 0;
     const purchases = [];
@@ -166,6 +160,14 @@ exports.buyExtras = async (req, res) => {
           await transaction.rollback();
           return res.status(400).json({
             error: `${extra.name} is not available`
+          });
+        }
+
+        // Validate meal slot
+        if (extra.mealType.toLowerCase() !== 'all' && extra.mealType.toLowerCase() !== currentMeal.toLowerCase()) {
+          await transaction.rollback();
+          return res.status(400).json({
+            error: `${extra.name} is not available for ${currentMeal}`
           });
         }
 
@@ -198,7 +200,7 @@ exports.buyExtras = async (req, res) => {
 
         await Transaction.create({
           StudentRollNo: studentId,
-          itemName: extra.name,
+          itemName: `${extra.name} (${currentMeal})`,
           amount: price,
           type: 'extra',
           status: 'Completed',
@@ -208,7 +210,7 @@ exports.buyExtras = async (req, res) => {
         totalAmount += price;
 
         purchases.push({
-          itemName: extra.name,
+          itemName: `${extra.name} (${currentMeal})`,
           quantity: item.quantity,
           price: price
         });
@@ -249,6 +251,21 @@ exports.getMyExtras = async (req, res) => {
 
     purchases.forEach(p => {
       total += parseFloat(p.totalPrice);
+    });
+
+    // Also include costs of approved Pre-bookings
+    const prebookings = await PreBooking.findAll({
+      where: { 
+        StudentRollNo: req.user.rollNo,
+        status: 'Approved'
+      },
+      include: [{ model: SpecialItem }]
+    });
+
+    prebookings.forEach(pb => {
+      if (pb.SpecialItem) {
+        total += parseFloat(pb.SpecialItem.price);
+      }
     });
 
     res.json({
