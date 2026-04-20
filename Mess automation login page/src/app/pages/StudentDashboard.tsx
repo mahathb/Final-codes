@@ -8,6 +8,7 @@ import { ViewDues } from '@/app/components/ViewDues';
 import { Vote } from '@/app/components/Vote';
 import { Feedback } from '@/app/components/Feedback';
 import { RequestRebate } from '@/app/components/RequestRebate';
+import logo from '../../assets/IIT_Kanpur_Logo.svg.png';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
@@ -52,10 +53,7 @@ export default function StudentDashboard() {
       <header className="bg-white border-b border-gray-200 py-4 px-6 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Logo Placeholder - Add your IIT Kanpur logo here */}
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-gray-500 text-xs font-semibold">LOGO</span>
-            </div>
+            <img src={logo} alt="IIT Kanpur Logo" className="w-16 h-16 object-contain" />
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Mess Automation System</h1>
               <p className="text-sm text-gray-600">IIT Kanpur</p>

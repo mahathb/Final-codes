@@ -217,17 +217,17 @@ exports.login = async (req, res) => {
     }
 
     if (role === "student") {
-      console.log(`[LOGIN DEBUG] Student find results: rollNo=${user.rollNo}, email=${user.email}, status=${user.status}, messCardStatus=${user.messCardStatus}`);
+      // console.log(`[LOGIN DEBUG] Student find results: rollNo=${user.rollNo}, email=${user.email}, status=${user.status}, messCardStatus=${user.messCardStatus}`);
 
       if (user.status && user.status.toLowerCase() === "pending") {
-        console.log(`[LOGIN BLOCKED] Reason: Pending approval`);
+        // console.log(`[LOGIN BLOCKED] Reason: Pending approval`);
         return res.status(403).json({
           error: "Your account is pending approval by manager"
         });
       }
 
       if (user.status && user.status.toLowerCase() === "rejected") {
-        console.log(`[LOGIN BLOCKED] Reason: Rejected status`);
+        // console.log(`[LOGIN BLOCKED] Reason: Rejected status`);
         return res.status(403).json({
           error: "Your account has been rejected"
         });
@@ -235,13 +235,13 @@ exports.login = async (req, res) => {
 
       const isSuspended = user.messCardStatus && user.messCardStatus.toLowerCase() === "suspended";
       if (isSuspended) {
-        console.log(`[LOGIN BLOCKED] Reason: Suspended mess status`);
+        // console.log(`[LOGIN BLOCKED] Reason: Suspended mess status`);
         return res.status(403).json({
           error: "Your account is currently suspended from accessing mess facilities."
         });
       }
       
-      console.log(`[LOGIN GRANTED] Student ${user.rollNo} is entering the system.`);
+      // console.log(`[LOGIN GRANTED] Student ${user.rollNo} is entering the system.`);
     }
 
     const token = generateToken(user, role);
@@ -292,7 +292,7 @@ exports.loginFace = async (req, res) => {
             return res.status(400).json({ error: "Face recognized, but student record moved. Please login manually." });
         }
 
-        console.log(`[FACE LOGIN] Recognized student: ${user.rollNo}. status: ${user.status}, messCardStatus: ${user.messCardStatus}`);
+        // console.log(`[FACE LOGIN] Recognized student: ${user.rollNo}. status: ${user.status}, messCardStatus: ${user.messCardStatus}`);
 
         if (user.status && user.status.toLowerCase() === "pending") {
             return res.status(403).json({ error: "Your account is pending approval by manager" });

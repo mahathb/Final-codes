@@ -31,6 +31,7 @@ export function MenuManagement() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
   const [newItemCategory, setNewItemCategory] = useState('Snacks');
+  const [newItemQuantity, setNewItemQuantity] = useState('50');
   const [isAddingItem, setIsAddingItem] = useState(false);
 
   // BDMR State
@@ -141,7 +142,8 @@ export function MenuManagement() {
           name: i.name,
           price: parseFloat(i.price),
           mealType: i.mealType,
-          isAvailable: i.isAvailable
+          isAvailable: i.isAvailable,
+          stockQuantity: i.stockQuantity
         }));
         setExtraItems(items);
       }
@@ -304,6 +306,18 @@ export function MenuManagement() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ isAvailable: !currentStatus })
+      });
+      if (res.ok) fetchExtras();
+    } catch { /* */ }
+  };
+
+  const updateStock = async (id: string, newQuantity: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_HOST}/api/extras/update/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ stockQuantity: newQuantity })
       });
       if (res.ok) fetchExtras();
     } catch { /* */ }
@@ -580,9 +594,10 @@ export function MenuManagement() {
         {showAddItemForm && (
           <div className="border-2 border-black p-6 bg-gray-50 space-y-4">
             <h4 className="font-bold">Add New Extra Item</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <input type="text" placeholder="Item Name" value={newItemName} onChange={e => setNewItemName(e.target.value)} className="p-2 border border-black" />
               <input type="number" placeholder="Price (₹)" value={newItemPrice} onChange={e => setNewItemPrice(e.target.value)} className="p-2 border border-black" />
+              <input type="number" placeholder="Stock Quantity" value={newItemQuantity} onChange={e => setNewItemQuantity(e.target.value)} className="p-2 border border-black" />
               <select value={newItemCategory} onChange={e => setNewItemCategory(e.target.value)} className="p-2 border border-black bg-white">
                 <option value="Breakfast">Breakfast</option>
                 <option value="Lunch">Lunch</option>
@@ -599,7 +614,7 @@ export function MenuManagement() {
                   const res = await fetch(`${API_HOST}/api/extras/add`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ name: newItemName, price: newItemPrice, mealType: newItemCategory, day: 'All' })
+                    body: JSON.stringify({ name: newItemName, price: newItemPrice, mealType: newItemCategory, day: 'All', stockQuantity: parseInt(newItemQuantity) || 0 })
                   });
                   if (res.ok) {
                     fetchExtras();
@@ -632,7 +647,7 @@ export function MenuManagement() {
                 <th className="px-4 py-3 text-left">Item Name</th>
                 <th className="px-4 py-3 text-left">Category</th>
                 <th className="px-4 py-3 text-left">Price</th>
-                <th className="px-4 py-3 text-left">Status</th>
+                <th className="px-4 py-3 text-left">Status & Stock</th>
                 <th className="px-4 py-3 text-left">Actions</th>
               </tr>
             </thead>
@@ -643,13 +658,35 @@ export function MenuManagement() {
                   <td className="px-4 py-3 capitalize">{item.mealType}</td>
                   <td className="px-4 py-3">₹{item.price}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${item.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                      {item.isAvailable ? 'Available' : 'Unavailable'}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className={`px-2 py-1 rounded-full text-xs font-bold w-fit ${item.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {item.isAvailable ? 'Available' : 'Unavailable'}
+                      </span>
+                      <span className="text-xs text-gray-500 font-medium">
+                        {item.stockQuantity} Plates Left
+                      </span>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                      <input 
+                        type="number" 
+                        defaultValue={item.stockQuantity}
+                        id={`stock-${item.id}`}
+                        className="w-16 p-1 border border-gray-300 rounded text-sm"
+                      />
+                      <button
+                        onClick={() => {
+                          const input = document.getElementById(`stock-${item.id}`) as HTMLInputElement;
+                          const newQty = parseInt(input.value);
+                          if (!isNaN(newQty)) {
+                            updateStock(item.id, newQty);
+                          }
+                        }}
+                        className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+                      >
+                        Update
+                      </button>
                       <button
                         onClick={() => toggleStatus(item.id, item.isAvailable)}
                         className="text-sm bg-gray-100 px-2 py-1 rounded hover:bg-gray-200"

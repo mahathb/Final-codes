@@ -33,6 +33,10 @@ exports.addExtraItem = async (req, res) => {
       });
     }
 
+    if (req.body.stockQuantity !== undefined) {
+      req.body.isAvailable = Number(req.body.stockQuantity) > 0;
+    }
+
     const item = await ExtraItem.create(req.body);
 
     res.json({ message: "Item added", item });
@@ -54,6 +58,10 @@ exports.updateExtraItem = async (req, res) => {
 
     const item = await ExtraItem.findByPk(req.params.id);
     if (!item) return res.status(404).json({ error: "Item not found" });
+
+    if (req.body.stockQuantity !== undefined) {
+      req.body.isAvailable = Number(req.body.stockQuantity) > 0;
+    }
 
     await item.update(req.body);
 
@@ -189,6 +197,11 @@ exports.buyExtras = async (req, res) => {
         const price = parseFloat(extra.price) * item.quantity;
 
         extra.stockQuantity -= item.quantity;
+        
+        if (extra.stockQuantity <= 0) {
+          extra.isAvailable = false;
+        }
+        
         await extra.save({ transaction });
 
         const purchase = await ExtraPurchase.create({

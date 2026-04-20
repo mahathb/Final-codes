@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import Webcam from 'react-webcam';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 import logo from "../../assets/IIT_Kanpur_Logo.svg.png";
-import campusImage from "../../assets/photo-1541339907198-e08756dedf3f.avif";
+import campusImage from "../../assets/my.jpeg";
 export function LoginForm() {
   const navigate = useNavigate();
   const webcamRef = useRef<Webcam>(null); 

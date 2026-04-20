@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { Coffee, UtensilsCrossed, Moon, Megaphone, Calendar, ChevronRight } from 'lucide-react';
 import { WeeklyMenu } from './WeeklyMenu';
+=======
+import { Coffee, UtensilsCrossed, Moon, Megaphone } from 'lucide-react';
+import campusImg from '../../assets/sunset.jpg';
+>>>>>>> 43d12a21306d19a19a2a8d3503d7d906d629582a
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 export function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -119,9 +124,7 @@ export function Dashboard() {
     <div className="space-y-6">
       {/* Campus Image Banner */}
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-          <span className="text-gray-500 text-sm font-semibold">CAMPUS IMAGE PLACEHOLDER</span>
-        </div>
+        <img src={campusImg} alt="IITK Library" className="w-full h-64 object-cover" />
         <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50">
           <h3 className="text-lg font-bold text-gray-800">P.K. Kelkar Hall</h3>
           <p className="text-sm text-gray-600">Indian Institute of Technology, Kanpur</p>

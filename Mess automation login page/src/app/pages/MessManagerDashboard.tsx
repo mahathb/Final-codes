@@ -26,6 +26,7 @@ import { PollManagement } from '../components/PollManagement';
 import { NewPersonRequests } from '../components/NewPersonRequests';
 import { AnnouncementManagement } from '../components/AnnouncementManagement';
 import { ManagerSettings } from '../components/ManagerSettings';
+import logo from '../../assets/IIT_Kanpur_Logo.svg.png';
 
 export default function ManagerDashboard() {
   const navigate = useNavigate();
@@ -153,9 +154,7 @@ export default function ManagerDashboard() {
         </button>
 
         <div className="flex items-center gap-3 ml-4">
-          <div className="w-10 h-10 border-2 border-black flex items-center justify-center font-bold">
-            IIT
-          </div>
+          <img src={logo} alt="IIT Kanpur Logo" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="font-bold text-lg">Mess Management for Managers</h1>
             <p className="text-xs text-gray-600">IIT Kanpur</p>
