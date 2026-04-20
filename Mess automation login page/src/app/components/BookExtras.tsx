@@ -23,6 +23,7 @@ export function BookExtras() {
   const [cart, setCart] = useState<{ [key: string]: number }>({});
   const [activeSection, setActiveSection] =
     useState<'instant' | 'prebook'>('instant');
+  const [selectedMealSlot, setSelectedMealSlot] = useState<string>('Breakfast');
 
   // ✅ INSTANT PURCHASE ITEMS (with stock)
   const [extraItems, setExtraItems] = useState<ExtraItem[]>([]);
@@ -93,7 +94,41 @@ export function BookExtras() {
   }, [activeSection]);
 
   // 🔹 CART + STOCK LOGIC
+  useEffect(() => {
+    // When meal slot changes, remove incompatible items from cart
+    setCart(prevCart => {
+      const newCart = { ...prevCart };
+      let hasRemoved = false;
+      
+      const updatedExtras = [...extraItems];
+
+      Object.keys(newCart).forEach(itemId => {
+        const item = updatedExtras.find(i => i.id === itemId);
+        if (item && item.mealType.toLowerCase() !== 'all' && item.mealType.toLowerCase() !== selectedMealSlot.toLowerCase()) {
+          // Restore stock
+          item.stock += newCart[itemId];
+          delete newCart[itemId];
+          hasRemoved = true;
+        }
+      });
+
+      if (hasRemoved) {
+        setExtraItems(updatedExtras);
+      }
+
+      return newCart;
+    });
+  }, [selectedMealSlot]);
+
   const addToCart = (itemId: string) => {
+    const itemInfo = extraItems.find(i => i.id === itemId);
+    if (!itemInfo) return;
+
+    if (itemInfo.mealType.toLowerCase() !== 'all' && itemInfo.mealType.toLowerCase() !== selectedMealSlot.toLowerCase()) {
+      alert(`${itemInfo.name} is not available for ${selectedMealSlot}. Please change the meal slot in your cart to purchase this item.`);
+      return;
+    }
+
     setExtraItems(prev =>
       prev.map(item =>
         item.id === itemId && item.stock > 0
@@ -148,7 +183,7 @@ export function BookExtras() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ items: itemsPayload })
+        body: JSON.stringify({ items: itemsPayload, mealSlot: selectedMealSlot })
       });
 
       if (res.ok) {
@@ -324,8 +359,21 @@ export function BookExtras() {
           {/* CART */}
           <div className="lg:col-span-1 bg-white border rounded-lg p-6 shadow-sm sticky top-6">
             <h3 className="text-xl font-bold mb-4">Your Cart</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Select Meal Slot First:</label>
+              <select 
+                value={selectedMealSlot} 
+                onChange={e => setSelectedMealSlot(e.target.value)} 
+                className="w-full p-2 border border-blue-300 rounded bg-blue-50 text-blue-900 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+              </select>
+            </div>
+            
             {Object.keys(cart).length === 0 ? (
-              <p className="text-gray-500 text-center">Your cart is empty</p>
+              <p className="text-gray-500 text-center py-4">Your cart is empty</p>
             ) : (
               <>
                 {Object.entries(cart).map(([id, qty]) => {

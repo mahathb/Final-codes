@@ -1,5 +1,5 @@
 // controllers/preBookingController.js
-const { PreBooking, Student } = require("../models/Index");
+const { PreBooking, Student, Transaction, SpecialItem } = require("../models/Index");
 
 exports.bookItem = async (req, res) => {
   try {
@@ -81,13 +81,31 @@ exports.updateBookingStatus = async (req, res) => {
       return res.status(400).json({ error: "Invalid status" });
     }
 
-    const booking = await PreBooking.findByPk(id);
+    const booking = await PreBooking.findByPk(id, {
+      include: [SpecialItem]
+    });
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
     }
 
+    const oldStatus = booking.status;
     booking.status = status;
     await booking.save();
+
+    // If status changed to Approved, create a transaction
+    if (status === 'Approved' && oldStatus !== 'Approved') {
+      const price = booking.SpecialItem ? parseFloat(booking.SpecialItem.price) : 0;
+      if (price > 0) {
+        await Transaction.create({
+          StudentRollNo: booking.StudentRollNo,
+          itemName: `Pre-booking: ${booking.dishName}`,
+          amount: price,
+          type: 'extra',
+          status: 'Completed',
+          date: new Date()
+        });
+      }
+    }
 
     res.json({ message: `Booking ${status}`, booking });
   } catch (err) {
