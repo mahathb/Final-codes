@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Send, Trash2, Megaphone } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 
@@ -49,16 +50,16 @@ export function AnnouncementManagement() {
         body: JSON.stringify({ title, content })
       });
       if (res.ok) {
-        alert('Announcement created!');
+        toast.success('Announcement created!');
         setTitle('');
         setContent('');
         fetchAnnouncements();
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to create');
+        toast.error(error.error || 'Failed to create');
       }
     } catch (err) {
-      alert('Network error');
+      toast.error('Network error');
     }
   };
 

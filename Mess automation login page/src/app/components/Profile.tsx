@@ -1,6 +1,7 @@
 import { User, Mail, Building, Camera, CheckCircle, XCircle, Phone, Edit2, Save, X, Lock } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 export function Profile() {
   const [studentData, setStudentData] = useState({
@@ -63,7 +64,7 @@ export function Profile() {
   }, []);
   const handleSaveProfile = async () => {
     if (!editData.name.trim()) {
-      alert("Name cannot be empty");
+      toast.error("Name cannot be empty");
       return;
     }
     try {
@@ -90,13 +91,13 @@ export function Profile() {
           phone: editData.phone
         }));
         setIsEditing(false);
-        alert('Profile updated successfully!');
+        toast.success('Profile updated successfully!');
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to update profile');
+        toast.error(err.error || 'Failed to update profile');
       }
     } catch (err) {
-      alert('Network error');
+      toast.error('Network error');
     } finally {
       setIsSaving(false);
     }
@@ -129,15 +130,15 @@ export function Profile() {
       });
 
       if (res.ok) {
-        alert("Face profile updated successfully!");
+        toast.success("Face profile updated successfully!");
         setStudentData(prev => ({ ...prev, hasFace: true }));
         setShowWebcam(false);
       } else {
         const data = await res.json();
-        alert(data.error || "Upload failed");
+        toast.error(data.error || "Upload failed");
       }
     } catch (err) {
-      alert("Error connecting to server");
+      toast.error("Error connecting to server");
     } finally {
       setIsUploading(false);
     }
@@ -170,7 +171,7 @@ const handleChangePassword = async () => {
       });
 
       if (res.ok) {
-        alert('Password changed successfully!');
+        toast.success('Password changed successfully!');
         setShowChangePassword(false);
         setChangePasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
         // Optionally, log out the user or refresh token

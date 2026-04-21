@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, Star, Send } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface FeedbackItem {
   id?: string;
@@ -39,11 +40,11 @@ export function Feedback() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
-      alert('Please provide a rating');
+      toast.error('Please provide a rating');
       return;
     }
     if (!comment.trim()) {
-      alert('Please write your feedback');
+      toast.error('Please write your feedback');
       return;
     }
 
@@ -60,7 +61,7 @@ export function Feedback() {
 
       if (res.ok) {
         const data = await res.json();
-        alert('Feedback submitted successfully! Thank you for your input.');
+        toast.success('Feedback submitted successfully! Thank you for your input.');
         setPreviousFeedback([data.feedback, ...previousFeedback]);
         setRating(0);
         setCategory('Food Quality');
@@ -68,10 +69,10 @@ export function Feedback() {
         setIsAnonymous(false);
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to submit feedback');
+        toast.error(err.error || 'Failed to submit feedback');
       }
     } catch (err) {
-      alert('Backend unreachable');
+      toast.error('Backend unreachable');
     }
   };
 

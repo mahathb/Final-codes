@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ThumbsUp, Clock, CheckCircle2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface PollOption {
   id: number;
@@ -98,7 +99,7 @@ export function Vote() {
       const missingMeals = availableMealTypes.filter(meal => !pollSelections[meal]);
 
       if (missingMeals.length > 0) {
-        alert(`Please select one option for: ${missingMeals.join(', ')}`);
+        toast.error(`Please select one option for: ${missingMeals.join(', ')}`);
         return;
       }
 
@@ -110,14 +111,14 @@ export function Vote() {
 
       if (res.ok) {
         const data = await res.json();
-        alert(data.message || 'Vote processed successfully!');
+        toast.success(data.message || 'Vote processed successfully!');
         setVotedPolls(prev => new Set(prev).add(pollId));
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to submit vote');
+        toast.error(err.error || 'Failed to submit vote');
       }
     } catch {
-      alert('Network error');
+      toast.error('Network error');
     }
   };
 

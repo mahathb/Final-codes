@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Save, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface MenuItem {
   id: string;
@@ -80,7 +81,8 @@ export function MenuManagement() {
 
   const handleAddNewDaySave = async () => {
     if (!newDayDateVal) {
-      return alert("Please select a date first");
+      toast.error("Please select a date first");
+      return;
     }
     
     // Get the standard weekday name (e.g. "Wednesday") to match backend Enum
@@ -93,7 +95,7 @@ export function MenuManagement() {
       (existingDay.breakfast.length > 0 || existingDay.lunch.length > 0 || existingDay.dinner.length > 0);
       
     if (isPopulated) {
-      alert("already this is there");
+      toast.error("Menu for this day already exists");
       return;
     }
 
@@ -121,10 +123,10 @@ export function MenuManagement() {
         setNewDayMeals({ breakfast: '', lunch: '', dinner: '' });
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to add day');
+        toast.error(err.error || 'Failed to add day');
       }
     } catch (err) {
-      alert('Network error while adding day');
+      toast.error('Network error while adding day');
     }
   };
 
@@ -208,13 +210,13 @@ export function MenuManagement() {
       if (res.ok) {
         setEditingDay(null);
         fetchMenu();
-        alert(`${day} menu updated!`);
+        toast.success(`${day} menu updated!`);
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to update menu');
+        toast.error(err.error || 'Failed to update menu');
       }
     } catch (err) {
-      alert('Network error while saving menu');
+      toast.error('Network error while saving menu');
     }
   };
 
@@ -351,15 +353,15 @@ export function MenuManagement() {
         fetchBookings();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to update status");
+        toast.error(err.error || "Failed to update status");
       }
     } catch {
-      alert("Network error");
+      toast.error("Network error");
     }
   };
 
   const handleCreateSpecial = async () => {
-    if (!newSpecialName || !newSpecialPrice) return alert("Please enter name and price");
+    if (!newSpecialName || !newSpecialPrice) return toast.error("Please enter name and price");
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_HOST}/api/special-items`, {
@@ -375,7 +377,7 @@ export function MenuManagement() {
       if (res.ok) {
         fetchSpecialItems();
         setNewSpecialName(''); setNewSpecialPrice('');
-        alert("Special item created!");
+        toast.success("Special item created!");
       }
     } catch { /* */ }
   };
@@ -383,21 +385,21 @@ export function MenuManagement() {
   const handleUpdateBDMR = async () => {
     // Validate BDMR value
     if (!bdmr || bdmr === '') {
-      return alert("Please enter a valid amount");
+      return toast.error("Please enter a valid amount");
     }
     
     const bdmrValue = parseFloat(bdmr);
     
     if (isNaN(bdmrValue)) {
-      return alert("Please enter a valid amount");
+      return toast.error("Please enter a valid amount");
     }
     
     if (bdmrValue < 0) {
-      return alert("BDMR cannot be negative");
+      return toast.error("BDMR cannot be negative");
     }
     
     if (bdmrValue === 0) {
-      return alert("BDMR must be greater than 0");
+      return toast.error("BDMR must be greater than 0");
     }
     
     try {
@@ -409,12 +411,12 @@ export function MenuManagement() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ key: configKey, value: bdmrValue })
       });
-      if (res.ok) alert("BDMR Settings Updated for this month!");
+      if (res.ok) toast.success("BDMR Settings Updated for this month!");
       else {
         const err = await res.json();
-        alert(err.error || "Failed to update BDMR settings");
+        toast.error(err.error || "Failed to update BDMR settings");
       }
-    } catch { alert("Network error"); }
+    } catch { toast.error("Network error"); }
   };
 
   const renderPreBooking = () => (
@@ -623,10 +625,10 @@ export function MenuManagement() {
                     setNewItemPrice('');
                   } else {
                     const err = await res.json();
-                    alert(err.error || 'Failed to add item');
+                    toast.error(err.error || 'Failed to add item');
                   }
                 } catch (err) {
-                  alert('Network error');
+                  toast.error('Network error');
                 } finally {
                   setIsAddingItem(false);
                 }

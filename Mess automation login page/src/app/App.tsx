@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // These paths assume App.tsx is inside src/app/
 // and your components are in src/app/components/
@@ -27,6 +29,7 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode, 
 export default function App() {
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <Routes>
           {/* Main Login / Registration Page */}

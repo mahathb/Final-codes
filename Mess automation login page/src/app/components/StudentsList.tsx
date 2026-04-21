@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Download, Trash2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface Student {
   id: string;
@@ -54,7 +55,7 @@ export function StudentsList() {
   const toggleStatus = async (rollNo: string, status: Student['messStatus']) => {
     try {
       if (status==='pending') {
-        alert("Cannot change status of a pending student. Please approve or reject their application first.");
+        toast.error("Cannot change status of a pending student. Please approve or reject their application first.");
         return;
       }
       const token = localStorage.getItem('token');
@@ -66,10 +67,10 @@ export function StudentsList() {
         fetchStudents();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to toggle status");
+        toast.error(err.error || "Failed to toggle status");
       }
     } catch (err) {
-      alert("Network error");
+      toast.error("Network error");
     }
   };
 
@@ -84,14 +85,14 @@ export function StudentsList() {
       });
 
       if (res.ok) {
-        alert("Student deleted successfully");
+        toast.success("Student deleted successfully");
         fetchStudents();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to delete student");
+        toast.error(err.error || "Failed to delete student");
       }
     } catch (err) {
-      alert("Network error");
+      toast.error("Network error");
     }
   };
 
@@ -119,7 +120,7 @@ export function StudentsList() {
 
   const handleExport = () => {
     if (filteredStudents.length === 0) {
-      alert("No data available to export.");
+      toast.error("No data available to export.");
       return;
     }
 

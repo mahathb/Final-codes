@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, AlertCircle, Trash2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface RebateRequest {
   id?: string;
@@ -58,7 +59,7 @@ export function RequestRebate() {
     if (isSubmitting) return;
 
     if (!startDate || !endDate) {
-      alert('Please select both start and end dates');
+      toast.error('Please select both start and end dates');
       return;
     }
 
@@ -66,12 +67,12 @@ export function RequestRebate() {
     const end = new Date(endDate);
     
     if (end < start) {
-      alert('End date cannot be before start date');
+      toast.error('End date cannot be before start date');
       return;
     }
 
     if (!reason.trim()) {
-      alert('Please provide a reason for the rebate request');
+      toast.error('Please provide a reason for the rebate request');
       return;
     }
 
@@ -90,7 +91,7 @@ export function RequestRebate() {
       if (res.ok) {
         const data = await res.json();
         const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        alert(`Rebate request submitted successfully!\nDuration: ${days} day(s)\nYour request will be reviewed by the mess manager.`);
+        toast.success(`Rebate request submitted successfully! Duration: ${days} day(s). Your request will be reviewed by the mess manager.`);
         
         setPreviousRequests([data.rebate, ...previousRequests]);
         setStartDate('');
@@ -98,10 +99,10 @@ export function RequestRebate() {
         setReason('');
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to submit rebate request');
+        toast.error(err.error || 'Failed to submit rebate request');
       }
     } catch (err) {
-      alert('Backend unreachable');
+      toast.error('Backend unreachable');
     } finally {
       setIsSubmitting(false);
     }
@@ -121,10 +122,10 @@ export function RequestRebate() {
         setPreviousRequests(previousRequests.filter(r => r.id !== id));
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to delete rebate');
+        toast.error(err.error || 'Failed to delete rebate');
       }
     } catch {
-      alert('Network error');
+      toast.error('Network error');
     }
   };
 

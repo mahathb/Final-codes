@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Play, Square, BarChart3, Trash2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface PollOption {
   id: number;
@@ -65,16 +66,16 @@ export function PollManagement() {
         body: JSON.stringify({ title: newTitle, description: newDesc, options })
       });
       if (res.ok) {
-        alert('Poll created!');
+        toast.success('Poll created!');
         setShowCreateForm(false);
         setNewTitle(''); setNewDesc(''); setNewBreakfast(''); setNewLunch(''); setNewDinner('');
         fetchPolls();
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to create poll');
+        toast.error(err.error || 'Failed to create poll');
       }
     } catch {
-      alert('Network error');
+      toast.error('Network error');
     } finally {
       setIsCreating(false);
     }
@@ -114,10 +115,10 @@ export function PollManagement() {
         fetchPolls();
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to delete poll');
+        toast.error(err.error || 'Failed to delete poll');
       }
     } catch {
-      alert('Network error');
+      toast.error('Network error');
     }
   };
 

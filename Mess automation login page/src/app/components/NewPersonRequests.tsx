@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Check, X, User, Mail, Phone } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface PersonRequest {
   id: string;
@@ -59,13 +60,13 @@ export function NewPersonRequests() {
         setRequests((prev) =>
           prev.map((req) => (req.id === id ? { ...req, status: action } : req))
         );
-        alert(`Student ${action} successfully.`);
+        toast.success(`Student ${action} successfully.`);
       } else {
         const err = await res.json();
-        alert(err.error || `Failed to ${action} student`);
+        toast.error(err.error || `Failed to ${action} student`);
       }
     } catch (err) {
-      alert('Backend connection failed');
+      toast.error('Backend connection failed');
     }
   };
 

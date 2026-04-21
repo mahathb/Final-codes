@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star, MessageSquare, TrendingUp, TrendingDown } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface Feedback {
   id: string;
@@ -63,12 +64,12 @@ export function FeedbackSection() {
       });
       if (res.ok) {
         setFeedbacks(feedbacks.map(f => f.id === id ? { ...f, status: editStatus, response: editResponse } : f));
-        alert('Feedback updated successfully!');
+        toast.success('Feedback updated successfully!');
       } else {
-        alert('Failed to update feedback');
+        toast.error('Failed to update feedback');
       }
     } catch (err) {
-      alert('Error updating feedback');
+      toast.error('Error updating feedback');
     }
   };
 

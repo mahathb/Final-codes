@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Plus, Minus, Calendar } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface ExtraItem {
   id: string;
@@ -125,7 +126,7 @@ export function BookExtras() {
     if (!itemInfo) return;
 
     if (itemInfo.mealType.toLowerCase() !== 'all' && itemInfo.mealType.toLowerCase() !== selectedMealSlot.toLowerCase()) {
-      alert(`${itemInfo.name} is not available for ${selectedMealSlot}. Please change the meal slot in your cart to purchase this item.`);
+      toast.error(`${itemInfo.name} is not available for ${selectedMealSlot}. Please change the meal slot in your cart to purchase this item.`);
       return;
     }
 
@@ -166,7 +167,7 @@ export function BookExtras() {
 
   const handleCheckout = async () => {
     if (!Object.keys(cart).length) {
-      alert('Your cart is empty!');
+      toast.error('Your cart is empty!');
       return;
     }
     
@@ -187,14 +188,14 @@ export function BookExtras() {
       });
 
       if (res.ok) {
-        alert(`Order placed successfully! Total amount: ₹${getTotalAmount()}`);
+        toast.success(`Order placed successfully! Total amount: ₹${getTotalAmount()}`);
         setCart({});
       } else {
         const err = await res.json();
-        alert(err.error || 'Checkout failed');
+        toast.error(err.error || 'Checkout failed');
       }
     } catch (err) {
-      alert('Backend connection failed');
+      toast.error('Backend connection failed');
     }
   };
 
@@ -224,7 +225,7 @@ export function BookExtras() {
     });
 
     if (itemsToBook.length === 0) {
-      alert('Please select at least one item to pre-book');
+      toast.error('Please select at least one item to pre-book');
       return;
     }
     
@@ -257,17 +258,17 @@ export function BookExtras() {
       }
 
       if (successCount > 0) {
-        alert(`Successfully placed ${successCount} pre-booking(s)!`);
+        toast.success(`Successfully placed ${successCount} pre-booking(s)!`);
         setPreBookings(prev => prev.map(item => ({ ...item, quantity: 0 })));
         await fetchMyBookings(); // Refresh UI to show confirmed status
       }
 
       if (errorMessages.length > 0) {
-        alert(`Errors encountered:\n${errorMessages.join('\n')}`);
+        toast.error(`Errors encountered: ${errorMessages.join(' | ')}`);
       }
 
     } catch (err) {
-      alert("Network error: Failed to connect to the server for pre-booking");
+      toast.error("Network error: Failed to connect to the server for pre-booking");
     }
   };
 

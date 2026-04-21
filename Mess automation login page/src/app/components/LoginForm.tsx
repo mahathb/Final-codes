@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Webcam from 'react-webcam';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 import logo from "../../assets/IIT_Kanpur_Logo.svg.png";
 import campusImage from "../../assets/my.jpeg";
@@ -77,18 +78,18 @@ export function LoginForm() {
         if (response.ok && data.message === 'Login successful') {
           localStorage.setItem('token', data.token);
           localStorage.setItem('role', data.role);
-          alert(`Welcome back!`);
+          toast.success(`Welcome back!`);
           role === 'student' ? navigate('/student-dashboard') : navigate('/manager-dashboard');
         } else {
-          alert(data.error || "Login failed.");
+          toast.error(data.error || "Login failed.");
         }
       } catch (error) {
-        alert("Backend unreachable.");
+        toast.error("Backend unreachable.");
       }
     } else {
       const imageSrc = webcamRef.current?.getScreenshot();
       if (!imageSrc) {
-          alert("Camera capture failed.");
+          toast.error("Camera capture failed.");
           return;
       }
 
@@ -103,17 +104,17 @@ export function LoginForm() {
         if (response.ok && data.message === 'Login successful') {
           localStorage.setItem('token', data.token);
           localStorage.setItem('role', data.role);
-          alert(`Welcome, ${data.user.name}`);
+          toast.success(`Welcome, ${data.user.name}`);
           navigate('/student-dashboard'); 
         } else if (data.status === 'unknown' || response.status === 400) {
-          alert(data.error || "Face not recognized. Please switch to the 'Password' tab to login.");
+          toast.error(data.error || "Face not recognized. Please switch to the 'Password' tab to login.");
           setAuthMethod('password'); // Automatically switch to password tab
         } else {
-          alert(data.error || "Action failed. Please try password login.");
+          toast.error(data.error || "Action failed. Please try password login.");
           setAuthMethod('password');
         }
       } catch (error) {
-        alert("Backend unreachable. Trying password login...");
+        toast.error("Backend unreachable. Trying password login...");
         setAuthMethod('password');
       }
     }
@@ -131,13 +132,13 @@ export function LoginForm() {
         const data = await response.json();
 
         if (response.ok || data.message === "OTP sent to email") {
-          alert("OTP sent to your email!");
+          toast.success("OTP sent to your email!");
           setShowOtpInput(true);
         } else {
-          alert(data.error || "Registration failed.");
+          toast.error(data.error || "Registration failed.");
         }
       } catch (error) {
-        alert("Backend unreachable.");
+        toast.error("Backend unreachable.");
       }
     } else {
       // Step 2: Verify OTP
@@ -150,7 +151,7 @@ export function LoginForm() {
         const data = await response.json();
 
         if (response.ok && data.token) {
-          alert("Registration Successful!");
+          toast.success("Registration Successful!");
           
           // Reset state to Login after successful registration
           localStorage.setItem('token', data.token);
@@ -161,10 +162,10 @@ export function LoginForm() {
           setShowWebcam(true);
           setStatusMessage('');
         } else {
-          alert(data.error || "Invalid OTP.");
+          toast.error(data.error || "Invalid OTP.");
         }
       } catch (error) {
-        alert("Backend unreachable.");
+        toast.error("Backend unreachable.");
       }
     }
   };
@@ -172,7 +173,7 @@ export function LoginForm() {
   const handleForgotPassword = async () => {
     try {
       if (!email) {
-        alert("Please enter your email");
+        toast.error("Please enter your email");
         return;
       }
       const response = await fetch(`${API_HOST}/api/auth/forgot-password`, {
@@ -182,20 +183,20 @@ export function LoginForm() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert("OTP sent to your email!");
+        toast.success("OTP sent to your email!");
         setResetStep(2);
       } else {
-        alert(data.error || "Failed to send OTP");
+        toast.error(data.error || "Failed to send OTP");
       }
     } catch (e) {
-      alert("Backend unreachable");
+      toast.error("Backend unreachable");
     }
   };
 
   const handleResetPassword = async () => {
     try {
       if (!otp || !newPassword) {
-        alert("Please enter OTP and new password.");
+        toast.error("Please enter OTP and new password.");
         return;
       }
       const response = await fetch(`${API_HOST}/api/auth/reset-password`, {
@@ -205,13 +206,13 @@ export function LoginForm() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert("Password reset successfully. You can now login.");
+        toast.success("Password reset successfully. You can now login.");
         resetMode(true);
       } else {
-        alert(data.error || "Failed to reset password");
+        toast.error(data.error || "Failed to reset password");
       }
     } catch (e) {
-      alert("Backend unreachable");
+      toast.error("Backend unreachable");
     }
   };
 

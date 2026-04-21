@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Check, X, Calendar, User } from 'lucide-react';
+import { toast } from 'react-toastify';
 const API_HOST = import.meta.env.VITE_API_HOST || 'http://localhost:5000';
 interface RebateRequest {
   id: string;
@@ -62,10 +63,10 @@ export function RebateRequests() {
         );
       } else {
         const err = await res.json();
-        alert(err.error || `Failed to ${action} rebate`);
+        toast.error(err.error || `Failed to ${action} rebate`);
       }
     } catch (err) {
-      alert('Backend connection failed');
+      toast.error('Backend connection failed');
     }
   };
 
