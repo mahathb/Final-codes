@@ -33,11 +33,12 @@ const seedDatabase = async () => {
         });
 
         // 2. Create a Manager (authController uses plain text for managers)
+        const hPassword = await bcrypt.hash("abcd1234", 10);
         await MessManager.create({
             id: 1,
             name: "Admin",
             email: "manager@mess.com",
-            password: "abcd1234" 
+            password: hPassword 
         });
 
         // 3. Create Menu for Today
